@@ -1,17 +1,17 @@
-ChakraCore
-================================
+# ChakraCore
 
-简介
---------------------------------
+
+## 简介
+
 ChakraCore是一个完整的JavaScript虚拟机，它拥有着和Chakra几乎相同的功能与特性。但在它们之间有两个不同点：
 
 - ChakraCore没有公开Chakra与浏览器/UWP之间的私有绑定部分
 - Chakra使用一套基于COM的诊断API，而ChakraCore使用一套基于JSON的诊断API。这套API是平台无关的，可用于之后不同实现之间的操作。
 
-|framework|
+![framework](../images/chakra/framework.png)
 
-执行流程
---------------------------------
+## 执行流程
+
 ChakraCore支持一种多级架构，包括：
 
 - (1)用来快速启动的解释器
@@ -30,10 +30,10 @@ ChakraCore的后台JIT编译器借助解释器生成的profile来推断可能出
 
 为了平衡JIT编译时间与内存占用，ChakraCore并不在一个函数每次释出时编译它，而是利用缓存下来的编译结果直到释出次数达到一定的门槛，之后才会迫使代码重新被JIT编译并且抛弃旧的编译结果。
 
-|pipeline|
+![](../images/chakra/pipeline.png)
 
-JIT编译器
---------------------------------
+## JIT编译器
+
 ChakraCore拥有两级JIT编译器。在同一个后台线程中，ChakraCore有一个完全JIT编译器(Full JIT Compiler)用来产生高度优化的代码；还有一个简单JIT编译器(Simple JIT Compiler)，这是一个有较少优化版本的完全JIT编译器。
 
 在执行时，ChkaraCore首先将解释执行的函数换入简单JIT编译器，然后才是完全JIT编译。
@@ -44,15 +44,13 @@ ChakraCore拥有两级JIT编译器。在同一个后台线程中，ChakraCore有
 
 无论何时，只要有潜在的未被利用的硬件资源，ChakraCore也可为后台JIT编译器产生多个并行线程。存在多个后台JIT编译线程时，ChakraCore的简单JIT编译和完全JIT编译的工作都会被分摊到多个编译线程上进行跨线程编译。这有助于在总体上减少JIT编译延迟。
 
-垃圾回收
---------------------------------
+## 垃圾回收
+
 ChakraCore拥有一个分代式标记清扫垃圾回收器，它支持并行、部分回收。当完全并行GC被初始化，ChakraCore的后台GC会进行一个初始标记阶段，然后重新扫描(rescan)来找出在这个初始标记阶段被主线程修改的对象，随后再运行第二个标记阶段来标记重新扫描时被修改的对象。当第二个标记阶段扫描结束后，主线程暂停执行并启动最终的重新扫描(final rescan)，之后最终的标记阶段(final marking pass)会被分解到主线程和已经在执行的GC线程。最后清扫阶段由后台GC线程完成，并且将无法到达的(unreachable)的对象重新加入分配池。
 
-|gc|
+![](../images/chakra/gc.png)
 
-代码结构
---------------------------------
-::
+## 代码结构
 
     .
     ├─bin                      生成可执行文件的工程，比如ChakraCore.dll
@@ -92,7 +90,3 @@ ChakraCore拥有一个分代式标记清扫垃圾回收器，它支持并行、�
 
 
 
-
-.. |framework| image:: ../images/chakra/framework.png
-.. |pipeline| image:: ../images/chakra/pipeline.png
-.. |gc| image:: ../images/chakra/gc.png
